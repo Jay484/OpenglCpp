@@ -111,28 +111,18 @@ int main()
 
     GLsizei n = 1;
     GLuint buffer;
-    float vertices[8] = {
-            0.5F, 0.5F,
-            -0.5F, 0.5F,
+    float vertices[6] = {
+            0.0F, .5F,
             -0.5F, -0.5F,
             0.5F, -0.5F
     };
-
-    unsigned int VBO;
+    unsigned int VAO;
     glGenBuffers(n, &buffer);
-    glGenVertexArrays(1, &VBO);
-    glBindVertexArray(VBO);
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), vertices, GL_STATIC_DRAW);
-
-    unsigned int indices[6] = {
-            0,1,2,
-            2, 3, 0
-    };
-    unsigned int IBO;
-    glGenBuffers(n, &buffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices , GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), vertices, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2,   0);
@@ -149,8 +139,8 @@ int main()
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-//        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
