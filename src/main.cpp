@@ -127,42 +127,45 @@ int main()
     }
     std::cout<<glGetString(GL_VERSION) <<std::endl;
 
-    GLsizei n = 1;
-    GLuint buffer;
     float vertices[8] = {
             0.5F, 0.5F,
             -0.5F, 0.5F,
             -0.5F, -0.5F,
             0.5F, -0.5F
     };
-
-    unsigned int VBO;
-    GLCall(glGenBuffers(n, &buffer));
-    GLCall(glGenVertexArrays(1, &VBO));
-    GLCall(glBindVertexArray(VBO));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), vertices, GL_STATIC_DRAW));
-
     unsigned int indices[6] = {
             0,1,2,
             2, 3, 0
     };
-    unsigned int IBO;
-    GLCall(glGenBuffers(n, &buffer));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices , GL_STATIC_DRAW));
 
+    GLuint buffer;
+    GLCall(glGenBuffers(1, &buffer));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+
+    unsigned int VBO;
+    GLCall(glGenVertexArrays(1, &VBO));
+    GLCall(glBindVertexArray(VBO));
+
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), vertices, GL_STATIC_DRAW));
     GLCall(glEnableVertexAttribArray(0));
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2,   0));
 
+    unsigned int IBO;
+    GLCall(glGenBuffers(1, &IBO));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices , GL_STATIC_DRAW));
+
     ShaderProgramSource source = ParseShader("../res/shaders/basic.shader");
-//    std::cout<<"Vertex source: \n"<<source.Vertex<<std::endl;
     unsigned program = CreateShader(source.Vertex, source.Fragment);
     GLCall(glUseProgram(program));
 
     GLCall(int location = glGetUniformLocation(program, "u_color"));
     Assert(location != -1);
-//    GLCall(glUniform4f(location,0.0,1.0,1.0,0.0));
+
+    GLCall(glUseProgram(0));
+    GLCall(glBindVertexArray(0));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
     float red  = 0.0f;
     float inc = 0.05f;
@@ -173,9 +176,15 @@ int main()
         /* Render here */
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
         std::cout<<red<<std::endl;
+        GLCall(glUseProgram(program));
+
         GLCall(glUniform4f(location,red,1.0F,0.0F,0.8F));
-//        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        GLCall(glBindVertexArray(VBO));
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO));
+
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT , nullptr));
+
         if(red> 1.0F){
             inc = -0.05F;
         }else if(red< 0.0F){
