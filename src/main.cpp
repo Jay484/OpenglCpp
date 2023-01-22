@@ -5,6 +5,23 @@
 #include <string>
 #include <sstream>
 
+#define Assert(x) if (!(x)) __builtin_trap()
+#define GLCall(x) clearGLError(); \
+    x;                         \
+    Assert(logGLCall(#x, __FILE__, __LINE__ ))
+
+static void clearGLError(){
+    while(glGetError() != GLEW_NO_ERROR);
+}
+
+static bool logGLCall(const char* function, const char* file, int line ){
+    while(GLenum error = glGetError()){
+        std::cout<<"[OPEN_GL Error] ("<<error<<"): "<<function<<" "<<file<<" :"<<line<<std::endl;
+        return false;
+    }
+    return true;
+}
+
 struct ShaderProgramSource{
     std::string Vertex;
     std::string Fragment;
@@ -93,7 +110,7 @@ int main()
     if (!window)
     {
         std::cout<<"Cant create window"<<std::endl;
-        glfwTerminate();
+        GLCall(glfwTerminate());
         return -1;
     }
 
@@ -102,63 +119,85 @@ int main()
     std::cout << "oepngl shader version: " << major << "." << minor << std::endl;
 
     /* Make the window's context current */
-    glfwMakeContextCurrent(window);
+    GLCall(glfwMakeContextCurrent(window));
+    glfwSwapInterval(1);
 
     if(glewInit() != GLEW_OK){
         std::cout<<"Not ok";
     }
     std::cout<<glGetString(GL_VERSION) <<std::endl;
 
-    GLsizei n = 1;
-    GLuint buffer;
     float vertices[8] = {
             0.5F, 0.5F,
             -0.5F, 0.5F,
             -0.5F, -0.5F,
             0.5F, -0.5F
     };
-
-    unsigned int VBO;
-    glGenBuffers(n, &buffer);
-    glGenVertexArrays(1, &VBO);
-    glBindVertexArray(VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), vertices, GL_STATIC_DRAW);
-
     unsigned int indices[6] = {
             0,1,2,
             2, 3, 0
     };
-    unsigned int IBO;
-    glGenBuffers(n, &buffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices , GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2,   0);
+    GLuint buffer;
+    GLCall(glGenBuffers(1, &buffer));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+
+    unsigned int VBO;
+    GLCall(glGenVertexArrays(1, &VBO));
+    GLCall(glBindVertexArray(VBO));
+
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), vertices, GL_STATIC_DRAW));
+    GLCall(glEnableVertexAttribArray(0));
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2,   0));
+
+    unsigned int IBO;
+    GLCall(glGenBuffers(1, &IBO));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices , GL_STATIC_DRAW));
 
     ShaderProgramSource source = ParseShader("../res/shaders/basic.shader");
-    std::cout<<"Vertex source: \n"<<source.Vertex<<std::endl;
-    std::cout<<"Fragment source: \n"<<source.Fragment<<std::endl;
     unsigned program = CreateShader(source.Vertex, source.Fragment);
-    glUseProgram(program);
+    GLCall(glUseProgram(program));
+
+    GLCall(int location = glGetUniformLocation(program, "u_color"));
+    Assert(location != -1);
+
+    GLCall(glUseProgram(0));
+    GLCall(glBindVertexArray(0));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
+    float red  = 0.0f;
+    float inc = 0.05f;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        GLCall(glClear(GL_COLOR_BUFFER_BIT));
+        std::cout<<red<<std::endl;
+        GLCall(glUseProgram(program));
 
-//        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        GLCall(glUniform4f(location,red,1.0F,0.0F,0.8F));
 
+        GLCall(glBindVertexArray(VBO));
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO));
+
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT , nullptr));
+
+        if(red> 1.0F){
+            inc = -0.05F;
+        }else if(red< 0.0F){
+            inc = 0.05F;
+        }
+        red+=inc;
         /* Swap front and back buffers */
-        glfwSwapBuffers(window);
+        GLCall(glfwSwapBuffers(window));
 
         /* Poll for and process events */
-        glfwPollEvents();
+        GLCall(glfwPollEvents());
     }
 
-    glfwTerminate();
+    GLCall(glfwTerminate());
     return 0;
 }
