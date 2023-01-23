@@ -15,7 +15,7 @@ VertexArray::~VertexArray() {
 
 void VertexArray::addBuffer(const VertexBuffer &vertexBuffer, const VertexBufferLayout &vertexBufferLayout) {
     bind();
-    vertexBuffer.Bind();
+    vertexBuffer.bind();
     const auto& elements = vertexBufferLayout.getElements();
     unsigned int offset = 0;
     for(unsigned int i = 0 ; i< elements.size(); i++){

@@ -19,5 +19,5 @@ link_directories(Dependencies/glfw-3.3.8.bin.MACOS/lib-x86_64/)
 link_libraries(${OPENGL_LIBRARIES})
 link_libraries(${GLEW_LIBRARIES})
 
-add_executable(Unity src/main.cpp src/Renderer.h src/Renderer.cpp src/VertexBuffer.h src/VertexBuffer.cpp src/IndexBuffer.h src/IndexBuffer.cpp src/VertexArray.h src/VertexBufferLayout.h src/VertexArray.cpp)
+add_executable(Unity src/main.cpp src/Renderer.h src/Renderer.cpp src/VertexBuffer.h src/VertexBuffer.cpp src/IndexBuffer.h src/IndexBuffer.cpp src/VertexArray.h src/VertexBufferLayout.h src/VertexArray.cpp src/Shader.cpp src/Shader.h)
 target_link_libraries(Unity  libglfw.3.dylib libGLEW.dylib)
