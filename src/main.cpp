@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
+#include "VertexArray.h"
 #include "GLFW/glfw3.h"
 #include <iostream>
 #include <fstream>
@@ -123,14 +124,11 @@ int main()
             2, 3, 0
     };
 
-    unsigned int VAO;
-    GLCall(glGenVertexArrays(1, &VAO));
-    GLCall(glBindVertexArray(VAO));
-
+    VertexArray vertexArray;
     VertexBuffer vertexBuffer(vertices, 8 * sizeof(float));
-    GLCall(glEnableVertexAttribArray(0));
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2,   0));
-
+    VertexBufferLayout layout;
+    layout.push<float>(2);
+    vertexArray.addBuffer(vertexBuffer, layout);
     IndexBuffer indexBuffer(indices, 6);
 
     ShaderProgramSource source = ParseShader("../res/shaders/basic.shader");
@@ -157,8 +155,8 @@ int main()
 
         GLCall(glUniform4f(location,red,1.0F,0.0F,0.8F));
 
-        GLCall(glBindVertexArray(VAO));
-        indexBuffer.Bind();
+        vertexArray.bind();
+        indexBuffer.bind();
 
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT , nullptr));
 
