@@ -3,6 +3,7 @@
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
 #include "VertexArray.h"
+#include "VertexBufferLayout.h"
 #include "GLFW/glfw3.h"
 #include "Shader.h"
 
@@ -72,6 +73,8 @@ int main()
     indexBuffer.unbind();
     shader.unbind();
 
+    Renderer renderer;
+
     float red  = 0.0f;
     float inc = 0.05f;
 
@@ -79,13 +82,13 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
-        GLCall(glClear(GL_COLOR_BUFFER_BIT));
+        renderer.clear();
         shader.bind();
         shader.setUniform4f("u_color", red,1.0F,0.0F,0.8F);
-        vertexArray.bind();
-        indexBuffer.bind();
+//        vertexArray.bind();
+//        indexBuffer.bind();
 
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT , nullptr));
+        renderer.draw(vertexArray, indexBuffer, shader);
 
         if(red> 1.0F){
             inc = -0.05F;
