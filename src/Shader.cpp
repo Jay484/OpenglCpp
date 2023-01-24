@@ -28,6 +28,10 @@ void Shader::setUniform4f(const std::string &name, float f0, float f1, float f2,
     GLCall(glUniform4f(getUniformLocation(name), f0, f1, f2, f3));
 }
 
+void Shader::setUniform1i(const std::string &name, int value) {
+    GLCall(glUniform1i(getUniformLocation(name),value));
+}
+
 enum class ShaderType{
     NONE = -1,
     VERTEX = 0,

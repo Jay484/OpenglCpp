@@ -6,6 +6,7 @@
 #include "VertexBufferLayout.h"
 #include "GLFW/glfw3.h"
 #include "Shader.h"
+#include "Texture.h"
 
 int main()
 {
@@ -45,20 +46,24 @@ int main()
     }
     std::cout<<glGetString(GL_VERSION) <<std::endl;
 
-    float vertices[8] = {
-            0.5F, 0.5F,
-            -0.5F, 0.5F,
-            -0.5F, -0.5F,
-            0.5F, -0.5F
+    float vertices[] = {
+            0.5F, 0.5F, 1.0F, 1.0F,
+            -0.5F, 0.5F, 0.0F, 1.0F,
+            -0.5F, -0.5F, 0.0F, 0.0F,
+            0.5F, -0.5F, 1.0F, 0.0F
     };
     unsigned int indices[6] = {
             0,1,2,
             2, 3, 0
     };
 
+    GLCall(glEnable(GL_BLEND));
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
     VertexArray vertexArray;
-    VertexBuffer vertexBuffer(vertices, 8 * sizeof(float));
+    VertexBuffer vertexBuffer(vertices, 4* 4 * sizeof(float));
     VertexBufferLayout layout;
+    layout.push<float>(2);
     layout.push<float>(2);
     vertexArray.addBuffer(vertexBuffer, layout);
     IndexBuffer indexBuffer(indices, 6);
@@ -85,8 +90,9 @@ int main()
         renderer.clear();
         shader.bind();
         shader.setUniform4f("u_color", red,1.0F,0.0F,0.8F);
-//        vertexArray.bind();
-//        indexBuffer.bind();
+        Texture texture("../res/textures/bishop.png");
+        texture.Bind(0);
+        shader.setUniform1i("u_texture", 0);
 
         renderer.draw(vertexArray, indexBuffer, shader);
 
