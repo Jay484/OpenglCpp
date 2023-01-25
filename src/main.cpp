@@ -9,6 +9,8 @@
 #include "Texture.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "imgui.h"
+#include "imgui_impl_glfw_gl3.h"
 
 int main()
 {
@@ -72,21 +74,23 @@ int main()
 
     glm::mat4 proj_matrix = glm::ortho(0.0F, 960.0F, 0.0F, 540.0F, -1.0F, 1.0F);
     glm::mat4 view_matrix = glm::translate(glm::mat4(1.0F),glm::vec3(-100,0,0));
-    glm::mat4 model_matrix = glm::translate(glm::mat4(1.0F),glm::vec3(100,100,0));
-
-    glm::mat4 mvp = proj_matrix * view_matrix * model_matrix;
 
     Shader shader("../res/shaders/basic.shader");
     shader.bind();
     shader.setUniform4f("u_color", 0.0F,1.0F,0.0F,0.8F);
-    shader.setUniformMat4f("u_mvp", mvp);
 
     vertexArray.unBind();
     vertexBuffer.unbind();
     indexBuffer.unbind();
     shader.unbind();
-
+    Texture texture("../res/textures/bishop.png");
     Renderer renderer;
+
+    ImGui::CreateContext();
+    ImGui_ImplGlfwGL3_Init(window, true);
+    ImGui::StyleColorsDark();
+
+    glm::vec3 translation(100,100,0);
 
     float red  = 0.0f;
     float inc = 0.05f;
@@ -96,10 +100,15 @@ int main()
     {
         /* Render here */
         renderer.clear();
+        ImGui_ImplGlfwGL3_NewFrame();
+
+        glm::mat4 model_matrix = glm::translate(glm::mat4(1.0F),translation);
+        glm::mat4 mvp = proj_matrix * view_matrix * model_matrix;
+
         shader.bind();
-        shader.setUniform4f("u_color", red,1.0F,0.0F,0.8F);
-        Texture texture("../res/textures/bishop.png");
         texture.Bind(0);
+        shader.setUniform4f("u_color", red,1.0F,0.0F,0.8F);
+        shader.setUniformMat4f("u_mvp", mvp);
         shader.setUniform1i("u_texture", 0);
 
         renderer.draw(vertexArray, indexBuffer, shader);
@@ -110,13 +119,22 @@ int main()
             inc = 0.05F;
         }
         red+=inc;
+
+        {
+            ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0F);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        }
+
+        ImGui::Render();
+        ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
         /* Swap front and back buffers */
         GLCall(glfwSwapBuffers(window));
 
         /* Poll for and process events */
         GLCall(glfwPollEvents());
     }
-
+    ImGui_ImplGlfwGL3_Shutdown();
+    ImGui::DestroyContext();
     GLCall(glfwTerminate());
     return 0;
 }
