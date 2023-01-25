@@ -9,6 +9,8 @@ Shader::Shader(const std::string &filePath)
     : m_filePath(filePath), m_rendererId(0)
 {
     ShaderProgramSource source = parseShader(filePath);
+//    std::cout<<"Vertex source: \n"<<source.Vertex<<std::endl;
+//    std::cout<<"Fragment source: \n"<<source.Fragment<<std::endl;
     m_rendererId = createShader(source.Vertex, source.Fragment);
 }
 
@@ -30,6 +32,10 @@ void Shader::setUniform4f(const std::string &name, float f0, float f1, float f2,
 
 void Shader::setUniform1i(const std::string &name, int value) {
     GLCall(glUniform1i(getUniformLocation(name),value));
+}
+
+void Shader::setUniformMat4f(const std::string &name, const glm::mat4& mat) {
+    GLCall(glUniformMatrix4fv(getUniformLocation(name),1, GL_FALSE, &mat[0][0]));
 }
 
 enum class ShaderType{
@@ -97,7 +103,7 @@ unsigned int Shader::createShader(const std::string &vertex_shader, const std::s
 int Shader::getUniformLocation(const std::string &name) {
     if(m_uniformLocationCache.find(name) != m_uniformLocationCache.end())
         return m_uniformLocationCache[name];
-    GLCall(int location = glGetUniformLocation(m_rendererId, "u_color"));
+    GLCall(int location = glGetUniformLocation(m_rendererId, name.c_str()));
     if(location == -1){
         std::cout<< "Warning: uniform '"<<name<<"' doesn't exist!!"<<std::endl;
     }

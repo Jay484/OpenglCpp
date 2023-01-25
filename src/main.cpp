@@ -7,6 +7,8 @@
 #include "GLFW/glfw3.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 int main()
 {
@@ -25,7 +27,7 @@ int main()
 #endif
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", nullptr, nullptr);
+    window = glfwCreateWindow(640, 640, "Hello World", nullptr, nullptr);
     if (!window)
     {
         std::cout<<"Cant create window"<<std::endl;
@@ -68,10 +70,12 @@ int main()
     vertexArray.addBuffer(vertexBuffer, layout);
     IndexBuffer indexBuffer(indices, 6);
 
+    glm::mat4 proj_matrix = glm::ortho(-2.0F, 2.0F, -1.5F, 1.5F, -1.0F, 1.0F);
+
     Shader shader("../res/shaders/basic.shader");
     shader.bind();
     shader.setUniform4f("u_color", 0.0F,1.0F,0.0F,0.8F);
-
+    shader.setUniformMat4f("u_mvp", proj_matrix);
 
     vertexArray.unBind();
     vertexBuffer.unbind();
