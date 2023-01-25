@@ -27,7 +27,7 @@ int main()
 #endif
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 640, "Hello World", nullptr, nullptr);
+    window = glfwCreateWindow(960, 540, "Hello World", nullptr, nullptr);
     if (!window)
     {
         std::cout<<"Cant create window"<<std::endl;
@@ -49,10 +49,10 @@ int main()
     std::cout<<glGetString(GL_VERSION) <<std::endl;
 
     float vertices[] = {
-            0.5F, 0.5F, 1.0F, 1.0F,
-            -0.5F, 0.5F, 0.0F, 1.0F,
-            -0.5F, -0.5F, 0.0F, 0.0F,
-            0.5F, -0.5F, 1.0F, 0.0F
+            200.0F, 200.0F, 1.0F, 1.0F,
+            100.0F, 200.0F, 0.0F, 1.0F,
+            100.0, 100.0F, 0.0F, 0.0F,
+            200.0F, 100.0F, 1.0F, 0.0F
     };
     unsigned int indices[6] = {
             0,1,2,
@@ -70,7 +70,7 @@ int main()
     vertexArray.addBuffer(vertexBuffer, layout);
     IndexBuffer indexBuffer(indices, 6);
 
-    glm::mat4 proj_matrix = glm::ortho(-2.0F, 2.0F, -1.5F, 1.5F, -1.0F, 1.0F);
+    glm::mat4 proj_matrix = glm::ortho(0.0F, 960.0F, 0.0F, 540.0F, -1.0F, 1.0F);
 
     Shader shader("../res/shaders/basic.shader");
     shader.bind();
