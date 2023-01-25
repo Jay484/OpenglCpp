@@ -71,11 +71,15 @@ int main()
     IndexBuffer indexBuffer(indices, 6);
 
     glm::mat4 proj_matrix = glm::ortho(0.0F, 960.0F, 0.0F, 540.0F, -1.0F, 1.0F);
+    glm::mat4 view_matrix = glm::translate(glm::mat4(1.0F),glm::vec3(-100,0,0));
+    glm::mat4 model_matrix = glm::translate(glm::mat4(1.0F),glm::vec3(100,100,0));
+
+    glm::mat4 mvp = proj_matrix * view_matrix * model_matrix;
 
     Shader shader("../res/shaders/basic.shader");
     shader.bind();
     shader.setUniform4f("u_color", 0.0F,1.0F,0.0F,0.8F);
-    shader.setUniformMat4f("u_mvp", proj_matrix);
+    shader.setUniformMat4f("u_mvp", mvp);
 
     vertexArray.unBind();
     vertexBuffer.unbind();
