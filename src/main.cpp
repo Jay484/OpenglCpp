@@ -51,10 +51,10 @@ int main()
     std::cout<<glGetString(GL_VERSION) <<std::endl;
 
     float vertices[] = {
-            200.0F, 200.0F, 1.0F, 1.0F,
-            100.0F, 200.0F, 0.0F, 1.0F,
-            100.0, 100.0F, 0.0F, 0.0F,
-            200.0F, 100.0F, 1.0F, 0.0F
+            50.0F, 50.0F, 1.0F, 1.0F,
+            -50.0F, 50.0F, 0.0F, 1.0F,
+            -50.0F, -50.0F, 0.0F, 0.0F,
+            50.0F, -50.0F, 1.0F, 0.0F
     };
     unsigned int indices[6] = {
             0,1,2,
@@ -73,11 +73,10 @@ int main()
     IndexBuffer indexBuffer(indices, 6);
 
     glm::mat4 proj_matrix = glm::ortho(0.0F, 960.0F, 0.0F, 540.0F, -1.0F, 1.0F);
-    glm::mat4 view_matrix = glm::translate(glm::mat4(1.0F),glm::vec3(-100,0,0));
+    glm::mat4 view_matrix = glm::translate(glm::mat4(1.0F),glm::vec3(0,0,0));
 
     Shader shader("../res/shaders/basic.shader");
     shader.bind();
-    shader.setUniform4f("u_color", 0.0F,1.0F,0.0F,0.8F);
 
     vertexArray.unBind();
     vertexBuffer.unbind();
@@ -90,7 +89,8 @@ int main()
     ImGui_ImplGlfwGL3_Init(window, true);
     ImGui::StyleColorsDark();
 
-    glm::vec3 translation(100,100,0);
+    glm::vec3 translationA(100,100,0);
+    glm::vec3 translationB(400,100,0);
 
     float red  = 0.0f;
     float inc = 0.05f;
@@ -102,16 +102,23 @@ int main()
         renderer.clear();
         ImGui_ImplGlfwGL3_NewFrame();
 
-        glm::mat4 model_matrix = glm::translate(glm::mat4(1.0F),translation);
-        glm::mat4 mvp = proj_matrix * view_matrix * model_matrix;
 
-        shader.bind();
-        texture.Bind(0);
-        shader.setUniform4f("u_color", red,1.0F,0.0F,0.8F);
-        shader.setUniformMat4f("u_mvp", mvp);
+        {
+            glm::mat4 model_matrix = glm::translate(glm::mat4(1.0F), translationA);
+            glm::mat4 mvp = proj_matrix * view_matrix * model_matrix;
+            shader.bind();
+            shader.setUniformMat4f("u_mvp", mvp);
+            renderer.draw(vertexArray, indexBuffer, shader);
+        }
+        {
+            glm::mat4 model_matrix = glm::translate(glm::mat4(1.0F), translationB);
+            glm::mat4 mvp = proj_matrix * view_matrix * model_matrix;
+            shader.bind();
+            shader.setUniformMat4f("u_mvp", mvp);
+            renderer.draw(vertexArray, indexBuffer, shader);
+        }
         shader.setUniform1i("u_texture", 0);
-
-        renderer.draw(vertexArray, indexBuffer, shader);
+        texture.Bind(0);
 
         if(red> 1.0F){
             inc = -0.05F;
@@ -121,7 +128,8 @@ int main()
         red+=inc;
 
         {
-            ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0F);
+            ImGui::SliderFloat3("Translation A", &translationA.x, 0.0f, 960.0F);
+            ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.0F);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         }
 
